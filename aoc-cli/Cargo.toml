@@ -1,0 +1,13 @@
+[package]
+name = "aoc-cli"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "aoc"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.4.8", features = ["derive"] }
+color-eyre = { workspace = true }
+reqwest = { version = "0.11.22", features = ["rustls-tls", "blocking", "cookies"], default-features = false }
