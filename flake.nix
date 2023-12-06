@@ -8,13 +8,18 @@
     fenix.inputs.nixpkgs.follows = "nixpkgs";
     crane.url = "github:ipetkov/crane";
     crane.inputs.nixpkgs.follows = "nixpkgs";
+    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
+    hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
 
   outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} ({lib, ...}: {
       systems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
 
-      imports = [inputs.pre-commit-hooks-nix.flakeModule];
+      imports = [
+        inputs.pre-commit-hooks-nix.flakeModule
+        inputs.hercules-ci-effects.flakeModule
+      ];
 
       perSystem = {
         config,
@@ -93,5 +98,7 @@
 
         formatter = pkgs.alejandra;
       };
-    };
+
+      herculesCI.ciSystems = lib.mkForce ["x86_64-linux" "aarch64-linux"];
+    });
 }
