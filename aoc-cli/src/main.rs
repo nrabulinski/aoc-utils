@@ -123,8 +123,13 @@ fn run(day: Option<usize>, test: bool) -> Result<()> {
 
 	let bin_name = format!("day{day_to_run:02}");
 
+	let (cmd, profile) = if test {
+		("test", "dev")
+	} else {
+		("run", "release")
+	};
 	let e = Command::new("cargo")
-		.args([if test { "test" } else { "run" }, "--bin", &bin_name])
+		.args([cmd, "--bin", &bin_name, "--profile", profile])
 		.exec();
 
 	Err(e.into())
