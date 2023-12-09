@@ -2,6 +2,8 @@ pub use color_eyre;
 pub use rangemap;
 pub use regex;
 
+pub mod iter;
+
 #[macro_export]
 macro_rules! aoc {
 	($input:ident : $part1:ident => ($part1_ex:ident) $part1_test:expr, $part2:ident => ($part2_ex:ident) $part2_test:expr) => {
