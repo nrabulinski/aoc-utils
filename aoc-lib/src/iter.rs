@@ -5,6 +5,21 @@ pub trait IterExt: Iterator {
 	{
 		Peek2::from_iter(self)
 	}
+
+	/// Optimized equivalent of `self.count() == n`
+	fn has_n(self, n: usize) -> bool
+	where
+		Self: Sized,
+	{
+		let mut curr = 0;
+		for _ in self {
+			curr += 1;
+			if curr > n {
+				return false;
+			}
+		}
+		curr == n
+	}
 }
 
 impl<I: Iterator> IterExt for I {}
