@@ -2,6 +2,7 @@ pub use color_eyre;
 pub use rangemap;
 pub use regex;
 
+pub mod algo;
 pub mod grid;
 pub mod iter;
 
