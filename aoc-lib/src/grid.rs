@@ -1,5 +1,26 @@
 use std::{iter::FusedIterator, ops::Index};
 
+type Point = (i64, i64);
+
+pub trait PointExt {
+	type Comp;
+
+	fn map(&self, f: impl FnMut(Self::Comp) -> Self::Comp) -> Self;
+	fn add(&self, other: &Self) -> Self;
+}
+
+impl PointExt for Point {
+	type Comp = i64;
+
+	fn map(&self, mut f: impl FnMut(Self::Comp) -> Self::Comp) -> Self {
+		(f(self.0), f(self.1))
+	}
+
+	fn add(&self, other: &Self) -> Self {
+		(self.0 + other.0, self.1 + other.1)
+	}
+}
+
 #[derive(Clone, Copy)]
 pub struct Grid<'a> {
 	base: &'a [u8],
@@ -150,11 +171,11 @@ impl<'a> Grid<'a> {
 		(0..self.width).map(|x| Column { grid: self, x })
 	}
 
-	pub fn is_valid_pos(&self, (x, y): (i64, i64)) -> bool {
+	pub fn is_valid_pos(&self, (x, y): Point) -> bool {
 		x >= 0 && x < self.width && y >= 0 && y < self.height
 	}
 
-	pub fn pos_to_idx(&self, (x, y): (i64, i64)) -> Option<usize> {
+	pub fn pos_to_idx(&self, (x, y): Point) -> Option<usize> {
 		self.is_valid_pos((x, y))
 			.then(|| (y * self.line_width + x) as usize)
 	}
@@ -163,15 +184,15 @@ impl<'a> Grid<'a> {
 		self.base.get(idx)
 	}
 
-	pub fn get_pos(&self, pos: (i64, i64)) -> Option<&u8> {
+	pub fn get_pos(&self, pos: Point) -> Option<&u8> {
 		self.pos_to_idx(pos).map(|idx| &self.base[idx])
 	}
 }
 
-impl<'a> Index<(i64, i64)> for Grid<'a> {
+impl<'a> Index<Point> for Grid<'a> {
 	type Output = u8;
 
-	fn index(&self, index: (i64, i64)) -> &Self::Output {
+	fn index(&self, index: Point) -> &Self::Output {
 		self.get_pos(index).unwrap()
 	}
 }
