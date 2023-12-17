@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+
 pub trait IterExt: Iterator {
 	fn peekable2(self) -> Peek2<Self>
 	where
@@ -19,6 +21,14 @@ pub trait IterExt: Iterator {
 			}
 		}
 		curr == n
+	}
+
+	fn arr_chunks<const N: usize>(self) -> Chunks<Self, N>
+	where
+		Self: Sized,
+	{
+		assert!(N != 0, "chunk size must be non-zero");
+		Chunks { iter: self }
 	}
 }
 
@@ -75,5 +85,30 @@ impl<I: Iterator> Iterator for Peek2<I> {
 			}
 			None => self.iter.next(),
 		}
+	}
+}
+
+pub struct Chunks<I: Iterator, const N: usize> {
+	iter: I,
+}
+
+impl<I: Iterator, const N: usize> Iterator for Chunks<I, N> {
+	type Item = [I::Item; N];
+
+	fn next(&mut self) -> Option<Self::Item> {
+		let mut res = MaybeUninit::<Self::Item>::uninit();
+
+		for i in 0..N {
+			let elem = self.iter.next()?;
+			// SAFETY: We're writing to the array, not reading from it,
+			//         and the index is guaranteed to be in bounds.
+			unsafe {
+				let r = &mut *res.as_mut_ptr();
+				*r.get_unchecked_mut(i) = elem;
+			}
+		}
+
+		// SAFETY: We know we have filled in all the array elements
+		Some(unsafe { res.assume_init() })
 	}
 }
