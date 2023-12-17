@@ -1,6 +1,6 @@
 use std::{iter::FusedIterator, ops::Index};
 
-type Point = (i64, i64);
+pub type Point = (i64, i64);
 
 pub trait PointExt {
 	type Comp;
@@ -180,12 +180,49 @@ impl<'a> Grid<'a> {
 			.then(|| (y * self.line_width + x) as usize)
 	}
 
+	pub fn idx_to_pos(&self, idx: usize) -> Option<Point> {
+		// This conversion is fine because if idx overflows i64
+		// we'll get an invalid position anyway.
+		let i = idx as i64;
+		let p = (i % self.line_width, i / self.line_width);
+		self.is_valid_pos(p).then_some(p)
+	}
+
 	pub fn get(&self, idx: usize) -> Option<&u8> {
 		self.base.get(idx)
 	}
 
 	pub fn get_pos(&self, pos: Point) -> Option<&u8> {
 		self.pos_to_idx(pos).map(|idx| &self.base[idx])
+	}
+
+	/// Returns all valid cells that are next to the given cell (including corners)
+	pub fn adjacent_pos(&self, pos: Point) -> impl Iterator<Item = Point> + '_ {
+		(-1..=1)
+			.flat_map(move |dx| (-1..=1).map(move |dy| pos.add(&(dx, dy))))
+			.filter(move |&p| p != pos && self.is_valid_pos(pos))
+	}
+
+	/// Returns all valid cells that are orthogonally adjacent to the given cell (i.e. *not* corners)
+	pub fn orthogonal_pos(&self, (x, y): Point) -> impl Iterator<Item = Point> + '_ {
+		let h = [-1, 1].into_iter().map(move |dx| (x + dx, y));
+		let v = [-1, 1].into_iter().map(move |dy| (x, y + dy));
+
+		h.chain(v).filter(|&pos| self.is_valid_pos(pos))
+	}
+
+	/// Returns all valid cells that surround given area (including corners)
+	pub fn adjacent_area(
+		&self,
+		top_left: Point,
+		bottom_right: Point,
+	) -> impl Iterator<Item = Point> + '_ {
+		let (sx, sy) = top_left;
+		let (ex, ey) = bottom_right;
+
+		let v = (sx - 1..=ex + 1).flat_map(move |x| [(x, sy - 1), (x, ey + 1)]);
+		let h = (sy..=ey).flat_map(move |y| [(sx - 1, y), (ex + 1, y)]);
+		h.chain(v).filter(|&pos| self.is_valid_pos(pos))
 	}
 }
 
