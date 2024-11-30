@@ -9,18 +9,14 @@
     fenix.url = "github:Defelo/fenix?ref=staging";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
     crane.url = "github:ipetkov/crane";
-    crane.inputs.nixpkgs.follows = "nixpkgs";
-    hercules-ci-effects.url = "github:hercules-ci/hercules-ci-effects";
-    hercules-ci-effects.inputs.flake-parts.follows = "flake-parts";
   };
 
   outputs = inputs:
-    inputs.flake-parts.lib.mkFlake {inherit inputs;} ({lib, ...}: {
+    inputs.flake-parts.lib.mkFlake {inherit inputs;} {
       systems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin"];
 
       imports = [
         inputs.pre-commit-hooks-nix.flakeModule
-        inputs.hercules-ci-effects.flakeModule
       ];
 
       perSystem = {
@@ -70,14 +66,14 @@
           alejandra.enable = true;
           deadnix.enable = true;
           nil.enable = true;
-          # TODO: This is broken on CI
-          # rustfmt.enable = true;
-          # clippy.enable = true;
-          # cargo-check.enable = true;
+          cargo-check = {
+            enable = true;
+            package = rust.toolchain;
+          };
         };
 
         devShells.default = pkgs.mkShell {
-          packages = [rust.toolchain] ++ lib.optionals pkgs.stdenv.isDarwin darwinDeps;
+          packages = [rust.toolchain pkgs.cargo-edit] ++ lib.optionals pkgs.stdenv.isDarwin darwinDeps;
           shellHook = ''
             ${config.pre-commit.installationScript}
           '';
@@ -99,7 +95,5 @@
 
         formatter = pkgs.alejandra;
       };
-
-      herculesCI.ciSystems = lib.mkForce ["x86_64-linux" "aarch64-linux"];
-    });
+    };
 }
