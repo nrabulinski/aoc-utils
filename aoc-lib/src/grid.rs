@@ -43,7 +43,7 @@ pub struct GridIter<'a> {
 	step: usize,
 }
 
-impl<'a> Iterator for GridIter<'a> {
+impl Iterator for GridIter<'_> {
 	type Item = u8;
 
 	fn next(&mut self) -> Option<Self::Item> {
@@ -67,7 +67,7 @@ impl<'a> Iterator for GridIter<'a> {
 	}
 }
 
-impl<'a> DoubleEndedIterator for GridIter<'a> {
+impl DoubleEndedIterator for GridIter<'_> {
 	fn next_back(&mut self) -> Option<Self::Item> {
 		if self.curr >= self.end {
 			None
@@ -83,9 +83,9 @@ impl<'a> DoubleEndedIterator for GridIter<'a> {
 	}
 }
 
-impl<'a> ExactSizeIterator for GridIter<'a> {}
+impl ExactSizeIterator for GridIter<'_> {}
 
-impl<'a> FusedIterator for GridIter<'a> {}
+impl FusedIterator for GridIter<'_> {}
 
 impl<'a> Row<'a> {
 	pub fn iter(&self) -> GridIter<'a> {
@@ -226,7 +226,7 @@ impl<'a> Grid<'a> {
 	}
 }
 
-impl<'a> Index<Point> for Grid<'a> {
+impl Index<Point> for Grid<'_> {
 	type Output = u8;
 
 	fn index(&self, index: Point) -> &Self::Output {
