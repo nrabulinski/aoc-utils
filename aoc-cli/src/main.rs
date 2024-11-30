@@ -136,6 +136,7 @@ fn run(day: Option<usize>, test: bool) -> Result<()> {
 }
 
 fn main() -> Result<()> {
+	dotenvy::dotenv()?;
 	color_eyre::install()?;
 
 	let cli = Cli::parse();
