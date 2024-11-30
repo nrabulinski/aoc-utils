@@ -4,7 +4,9 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
-    fenix.url = "github:nix-community/fenix";
+    # fenix.url = "github:nix-community/fenix";
+    # TODO: Remove once https://github.com/nix-community/fenix/pull/184 is resolved
+    fenix.url = "github:Defelo/fenix?ref=staging";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
     crane.url = "github:ipetkov/crane";
     crane.inputs.nixpkgs.follows = "nixpkgs";
@@ -26,7 +28,6 @@
         pkgs,
         lib,
         inputs',
-        system,
         ...
       }: let
         rust = inputs'.fenix.packages.default;
@@ -36,7 +37,7 @@
           inherit (pkgs.darwin.apple_sdk.frameworks) SystemConfiguration;
         };
 
-        crane = inputs.crane.lib.${system}.overrideToolchain rust.toolchain;
+        crane = (inputs.crane.mkLib pkgs).overrideToolchain rust.toolchain;
         craneArgs = {
           pname = "aoc-cli";
           version = "unstable-2023-12-05";
