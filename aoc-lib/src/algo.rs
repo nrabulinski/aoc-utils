@@ -38,6 +38,18 @@ where
 	W: Ord + Default + Clone + Add<Output = W>,
 	T: Clone + Eq + Hash,
 {
+	dijkstra_advance(start, |pos, _| get_neighbors(pos))
+}
+
+pub fn dijkstra_advance<T, W, I>(
+	start: T,
+	mut get_neighbors: impl FnMut(&T, &W) -> I,
+) -> (HashMap<T, W>, HashMap<T, T>)
+where
+	I: Iterator<Item = (T, W)>,
+	W: Ord + Default + Clone + Add<Output = W>,
+	T: Clone + Eq + Hash,
+{
 	let mut dist = HashMap::new();
 	let mut parent = HashMap::new();
 	let mut queue = BinaryHeap::new();
@@ -49,7 +61,7 @@ where
 	});
 
 	while let Some(HeapCell { key, prio }) = queue.pop() {
-		for (neighbor, cost) in get_neighbors(&key) {
+		for (neighbor, cost) in get_neighbors(&key, &prio) {
 			let d = prio.clone() + cost;
 			if dist.get(&neighbor).map(|curr| curr > &d).unwrap_or(true) {
 				queue.push(HeapCell {
