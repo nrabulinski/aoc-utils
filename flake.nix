@@ -4,9 +4,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     pre-commit-hooks-nix.url = "github:cachix/pre-commit-hooks.nix";
     pre-commit-hooks-nix.inputs.nixpkgs.follows = "nixpkgs";
-    # fenix.url = "github:nix-community/fenix";
-    # TODO: Remove once https://github.com/nix-community/fenix/pull/184 is resolved
-    fenix.url = "github:Defelo/fenix?ref=staging";
+    fenix.url = "github:nix-community/fenix";
     fenix.inputs.nixpkgs.follows = "nixpkgs";
     crane.url = "github:ipetkov/crane";
   };
@@ -28,18 +26,12 @@
       }: let
         rust = inputs'.fenix.packages.default;
 
-        darwinDeps = lib.attrValues {
-          inherit (pkgs) libiconv;
-          inherit (pkgs.darwin.apple_sdk.frameworks) SystemConfiguration;
-        };
-
         crane = (inputs.crane.mkLib pkgs).overrideToolchain rust.toolchain;
         craneArgs = {
           pname = "aoc-cli";
           version = "unstable-2023-12-05";
           src = crane.cleanCargoSource (crane.path ./.);
           strictDeps = true;
-          buildInputs = lib.optionals pkgs.stdenv.isDarwin darwinDeps;
         };
         cargoArtifacts = crane.buildDepsOnly (craneArgs
           // {
@@ -73,7 +65,7 @@
         };
 
         devShells.default = pkgs.mkShell {
-          packages = [rust.toolchain pkgs.cargo-edit] ++ lib.optionals pkgs.stdenv.isDarwin darwinDeps;
+          packages = [rust.toolchain pkgs.cargo-edit];
           shellHook = ''
             ${config.pre-commit.installationScript}
           '';
