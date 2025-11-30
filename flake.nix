@@ -29,7 +29,7 @@
         crane = (inputs.crane.mkLib pkgs).overrideToolchain rust.toolchain;
         craneArgs = {
           pname = "aoc-cli";
-          version = "unstable-2023-12-05";
+          version = "unstable-2025-11-30";
           src = crane.cleanCargoSource (crane.path ./.);
           strictDeps = true;
         };
