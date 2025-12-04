@@ -200,7 +200,7 @@ impl<'a> Grid<'a> {
 	pub fn adjacent_pos(&self, pos: Point) -> impl Iterator<Item = Point> + '_ {
 		(-1..=1)
 			.flat_map(move |dx| (-1..=1).map(move |dy| pos.add(&(dx, dy))))
-			.filter(move |&p| p != pos && self.is_valid_pos(pos))
+			.filter(move |&p| p != pos && self.is_valid_pos(p))
 	}
 
 	/// Returns all valid cells that are orthogonally adjacent to the given cell (i.e. *not* corners)
